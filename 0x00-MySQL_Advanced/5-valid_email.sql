@@ -4,14 +4,12 @@
 DELIMITER //
 
 CREATE TRIGGER reset_email_on_update
-    AFTER UPDATE ON users
-	FOR EACH ROW
+    BEFORE UPDATE ON users
+    FOR EACH ROW
 BEGIN
     IF NEW.email <> OLD.email THEN
-        UPDATE users
-	    SET valid_email = DEFAULT;
-	    WHERE id = NEW.id
-	END IF;
+        SET NEW.valid_email = 0;
+    END IF;
 END; //
 
 DELIMITER ;
