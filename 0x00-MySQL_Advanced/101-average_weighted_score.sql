@@ -6,40 +6,37 @@
 
 DELIMITER //
 
-CREATE PROCEDURE ComputeAverageWeightedScoreForUsers ()
+CREATE PROCEDURE ComputeAverageWeightedScoreForUsers()
 BEGIN
-    -- Declare variables
-    DECLARE user_id INT;
+    DECLARE done INT DEFAULT 0;
+    DECLARE current_user_id INT;
     DECLARE weighted_avg FLOAT;
-    
-    -- Declare a cursor for iterating through all users
-    DECLARE user_cursor CURSOR FOR
-    SELECT id FROM users;
-    
-    -- Declare a handler for the cursor
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET user_id = NULL;
-    
-    -- Open the cursor
+    DECLARE user_cursor CURSOR FOR SELECT id FROM users;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Open the cursor to iterate through each user
     OPEN user_cursor;
-    
-    -- Fetch each user_id from the cursor
-    user_loop: LOOP
-        FETCH user_cursor INTO user_id;
-        
-        -- If there are no more rows, exit the loop
-        IF user_id IS NULL THEN
-            LEAVE user_loop;
+
+    read_loop: LOOP
+        FETCH user_cursor INTO current_user_id;
+
+        -- If no more rows, exit the loop
+        IF done THEN
+            LEAVE read_loop;
         END IF;
-        
+
         -- Calculate the weighted average score for the current user
-        SELECT SUM(score * weight) / SUM(weight) INTO weighted_avg
-        FROM corrections
-        WHERE user_id = users_id;
-        
-        -- Store or output the weighted average for the user
-        SELECT user_id AS UserID, weighted_avg AS AverageWeightedScore;
-    END LOOP user_loop;
-    
+        SELECT SUM(c.score * p.weight) / SUM(p.weight) INTO weighted_avg
+        FROM corrections c
+        JOIN projects p ON c.project_id = p.id
+        WHERE c.user_id = current_user_id;
+
+        -- Update the user's average_score in the users table
+        UPDATE users
+        SET average_score = IFNULL(weighted_avg, 0)
+        WHERE id = current_user_id;
+    END LOOP;
+
     -- Close the cursor
     CLOSE user_cursor;
 END; //
