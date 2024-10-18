@@ -8,19 +8,21 @@
 DELIMITER //
 
 CREATE PROCEDURE ComputeAverageScoreForUser (
-    IN user_id INT
+    IN input_user_id INT
 )
 BEGIN
     DECLARE average_score FLOAT;
-	
-	-- Compute the average student score
-	SELECT AVG(score) INTO average_score
-	FROM corrections
-	WHERE user_id = user_id;
-	
-	-- Return the score average
-	SELECT average_score as AverageScore;
-	
+
+    -- Compute the average student score
+    SELECT AVG(score) INTO average_score
+    FROM corrections
+    WHERE user_id = input_user_id;
+
+    -- Insert into users
+    UPDATE users
+    SET average_score = average_score
+    WHERE id = input_user_id;
+
 END; //
 
 DELIMITER ;
