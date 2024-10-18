@@ -14,17 +14,17 @@ CREATE FUNCTION SafeDiv(a INT, b INT)
 RETURNS FLOAT
 DETERMINISTIC
 BEGIN
-    DECLARE results FLOAT
+    DECLARE result FLOAT;
 	
-	-- If second value not 0
+    -- If second value not 0
     IF b <> 0 THEN
-	    SET results = a / b;
-	ELSE
-	    SET results = 0;
-	END IF
+        SET result = a / b;
+    ELSE
+        SET result = 0;
+    END IF;
 
-	RETURNS results;
+    RETURN result;
 	
-END; //
+END //
 
 DELIMITER ;
