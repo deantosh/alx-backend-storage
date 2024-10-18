@@ -25,8 +25,6 @@ BEGIN
     SET average_score = IFNULL(weighted_avg, 0)
     WHERE id = user_id;
 
-    -- Return the computed weighted average
-    SELECT user_id AS UserID, IFNULL(weighted_avg, 0) AS AverageWeightedScore;
 END; //
 
 DELIMITER ;
