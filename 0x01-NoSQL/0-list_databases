@@ -1,4 +1,2 @@
 // List all databases in MongoDB
-db.adminCommand({ listDatabases: 1 }).databases.forEach(function(db) {
-    print(db.name);
-});
+show dbs;
