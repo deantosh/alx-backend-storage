@@ -1,4 +1,4 @@
 // List all databases in MongoDB
 db.adminCommand({ listDatabases: 1 }).databases.forEach(function(db) {
-    print(db.name + "\t" + (db.sizeOnDisk / (1024 * 1024 * 1024)).toFixed(3) + "GB");;
+    print(db.name + "\t" + (db.sizeOnDisk / (1024 * 1024 * 1024)).toFixed(3) + "GB");
 });
