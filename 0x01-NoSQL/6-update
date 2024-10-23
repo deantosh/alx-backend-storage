@@ -7,5 +7,3 @@ db.school.updateMany(
     { name: "Holberton school" },
     { $set: {address: "972 Mission street"} }
 );
-
-// db.school.find({ name: "Holberton school" }).pretty();
