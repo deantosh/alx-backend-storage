@@ -17,6 +17,10 @@ Class methods:
 3. Implement a system to count how many times methods of the Cache class are
    called.
 
+4. Implement a call_history decorator to store the history of inputs and
+   outputs for a particular function.
+      -> return the output
+
 Type-annotate store correctly. Remember that data can be a str, bytes,
 int or float.
 """
@@ -24,6 +28,29 @@ import redis
 import uuid
 import functools
 from typing import Optional, Union, Callable
+
+
+def call_history(method: Callable) -> Callable:
+    """ Decorator to store the call history of the method. """
+
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        # Create Redis keys for inputs and outputs
+        input_key = f"{method.__qualname__}:inputs"
+        output_key = f"{method.__qualname__}:outputs"
+
+        # Normalize and store input arguments
+        self._redis.rpush(input_key, str(args))
+
+        # Call the original method and store the result of the output
+        result = method(self, *args, **kwargs)
+
+        # Store output result
+        self._redis.rpush(output_key, str(result))
+
+        return result
+
+    return wrapper
 
 
 def count_calls(method: Callable) -> Callable:
@@ -50,6 +77,7 @@ class Cache:
         self._redis.flushdb()
 
     @count_calls
+    @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """ Takes argument, Generates a random key and store data in Redis """
         self.key = str(uuid.uuid4())  # generate id which is a str
