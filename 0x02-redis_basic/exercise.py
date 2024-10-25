@@ -14,13 +14,32 @@ Class methods:
       -> This callable will be used to convert the data back to the desired
          format.
       -> 2 fn's get_str and get_int
+3. Implement a system to count how many times methods of the Cache class are
+   called.
 
 Type-annotate store correctly. Remember that data can be a str, bytes,
 int or float.
 """
 import redis
 import uuid
+import functools
 from typing import Optional, Union, Callable
+
+
+def count_calls(method: Callable) -> Callable:
+    """
+    Decorator that counts how many times a method is called using Redis.
+    """
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """ Wraps the original method passed """
+        key = method.__qualname__  # get the qualified name of the method
+        self._redis.incr(key)  # increment the count for this method
+
+        # Call the original method and return its result
+        return method(self, *args, **kwargs)
+
+    return wrapper
 
 
 class Cache:
@@ -30,6 +49,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """ Takes argument, Generates a random key and store data in Redis """
         self.key = str(uuid.uuid4())  # generate id which is a str
