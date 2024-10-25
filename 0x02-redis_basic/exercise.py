@@ -21,6 +21,9 @@ Class methods:
    outputs for a particular function.
       -> return the output
 
+5. Implement a replay function to display the history of calls of a particular
+    function.
+
 Type-annotate store correctly. Remember that data can be a str, bytes,
 int or float.
 """
@@ -118,3 +121,20 @@ class Cache:
         Calls get() with a callable to convert bytes into an int.
         """
         return self.get(key, lambda data: int(data.decode('utf-8')))
+
+    def replay(self, method: Callable) -> None:
+        """ Display the history of calls for a particular function """
+        input_key = f"{method.__qualname__}:inputs"
+        output_key = f"{method.__qualname__}:outputs"
+
+        # Retrieve inputs and outputs from Redis
+        inputs = self._redis.lrange(input_key, 0, -1)
+        outputs = self._redis.lrange(output_key, 0, -1)
+
+        # Print the history of calls
+        print(f"{method.__qualname__} was called {len(inputs)} times:")
+        for inp, out in zip(inputs, outputs):
+            # Format inputs and outputs for display
+            input_args = inp.decode('utf-8').strip("()")  # remove parentheses
+            print(f"{method.__qualname__}(*({input_args},)) ->\
+{out.decode('utf-8')}")
